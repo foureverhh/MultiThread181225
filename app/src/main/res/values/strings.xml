@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MultiThread181225</string>
+    <string name="start_thread">start thread</string>
+    <string name="stop_thread">stop thread</string>
+</resources>
