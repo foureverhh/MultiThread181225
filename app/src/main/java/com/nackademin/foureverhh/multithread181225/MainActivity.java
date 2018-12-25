@@ -1,5 +1,6 @@
 package com.nackademin.foureverhh.multithread181225;
 
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +15,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_start, btn_stop;
     private TextView textView;
     private boolean mStopLoop;
-    private int count = 0;
+    int count = 0;
+    Handler handler;
+    Thread newThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +29,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btn_start.setOnClickListener(this);
         btn_stop.setOnClickListener(this);
+        //Make an instance of handler on the main looper
+        handler = new Handler(getApplicationContext().getMainLooper());
+
     }
 
     @Override
@@ -35,26 +41,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(getApplicationContext(),"Starter",Toast.LENGTH_SHORT).show();
                 mStopLoop=true;
                 //Thread newThread = new Thread(new Runnable() {
-                new Thread(new Runnable() {
+                newThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while(mStopLoop){
                             try {
-                                Thread.sleep(500);
+                                Thread.sleep(1000);
                                 count++;
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                             Log.i(TAG,"Thread id: " + Thread.currentThread().getId());
                             Log.e("Counter"," is "+count);
-                            textView.setText("Counter start:"+count);
+                            //Use the handler to post a task on the messageQueue
+                            //handler.post(new Runnable() {
+                            //    @Override
+                            //    public void run() {
+                            //        textView.setText("Counter start:"+count);
+                            //    }
+                            //});
+                            textView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    textView.setText("Counter start:"+count);
+                                }
+                            });
                         }
                     }
-                }).start();
-                //newThread.start();
+                });
+                newThread.start();
                 break;
             case R.id.buttonStopThread:
                 mStopLoop=false;
+                newThread.interrupt();
                 count = 0;
                 textView.setText("Counter stop :"+count);
                 break;
