@@ -77,7 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 myAsyncTask.execute(count);
                 break;
             case R.id.buttonStopThread:
-                mStopLoop=false;
+                //mStopLoop=false;
+                myAsyncTask.cancel(true);
                 //newThread.interrupt();
                 //count = 0;
                 //textView.setText("Counter stop :"+count);
