@@ -1,5 +1,6 @@
 package com.nackademin.foureverhh.multithread181225;
 
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,8 +17,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView textView;
     private boolean mStopLoop;
     int count = 0;
-    Handler handler;
-    Thread newThread;
+    private MyAsyncTask myAsyncTask;
+    //Handler handler;
+    //Thread newThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_start.setOnClickListener(this);
         btn_stop.setOnClickListener(this);
         //Make an instance of handler on the main looper
-        handler = new Handler(getApplicationContext().getMainLooper());
+        //handler = new Handler(getApplicationContext().getMainLooper());
 
     }
 
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(getApplicationContext(),"Starter",Toast.LENGTH_SHORT).show();
                 mStopLoop=true;
                 //Thread newThread = new Thread(new Runnable() {
-                newThread = new Thread(new Runnable() {
+            /*    newThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while(mStopLoop){
@@ -70,13 +72,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
                 newThread.start();
+                */
+                myAsyncTask = new MyAsyncTask();
+                myAsyncTask.execute(count);
                 break;
             case R.id.buttonStopThread:
                 mStopLoop=false;
-                newThread.interrupt();
-                count = 0;
-                textView.setText("Counter stop :"+count);
+                //newThread.interrupt();
+                //count = 0;
+                //textView.setText("Counter stop :"+count);
                 break;
+        }
+    }
+
+    private class MyAsyncTask extends AsyncTask<Integer,Integer,Integer>{
+
+        private int customCounter;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            customCounter = 0;
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+            customCounter = integers[0];
+            while(mStopLoop){
+                try {
+                    Thread.sleep(500);
+                    customCounter ++;
+                    //Pass customCounter to onProgressUpdate
+                    publishProgress(customCounter);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            //Pass customCounter back to onPreExecute()
+            return customCounter;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            textView.setText("Counter is "+values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            textView.setText("Counter is "+integer);
+            //Make count to be the last integer in Async task
+            count = integer;
         }
     }
 }
