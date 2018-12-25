@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.buttonThreadStarter:
                 mStopLoop=true;
-                Thread newThread = new Thread(new Runnable() {
+                //Thread newThread = new Thread(new Runnable() {
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while(mStopLoop){
@@ -44,10 +45,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 e.printStackTrace();
                             }
                             Log.i(TAG,"Thread id: " + Thread.currentThread().getId());
+                            textView.setText("Counter :"+count);
                         }
                     }
-                });
-                newThread.start();
+                }).start();
+                //newThread.start();
                 break;
             case R.id.buttonStopThread:
                 mStopLoop=false;
