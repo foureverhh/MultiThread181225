@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onPostExecute(integer);
             textView.setText("Counter is "+integer);
             //Make count to be the last integer in Async task
-            count = integer;
+            //count = integer;
         }
     }
 }
