@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -31,21 +32,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.buttonThreadStarter:
+                Toast.makeText(getApplicationContext(),"Starter",Toast.LENGTH_SHORT).show();
                 mStopLoop=true;
                 //Thread newThread = new Thread(new Runnable() {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while(mStopLoop){
-
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(500);
                                 count++;
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                             Log.i(TAG,"Thread id: " + Thread.currentThread().getId());
-                            textView.setText("Counter :"+count);
+                            Log.e("Counter"," is "+count);
+                            textView.setText("Counter start:"+count);
                         }
                     }
                 }).start();
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.buttonStopThread:
                 mStopLoop=false;
+                count = 0;
+                textView.setText("Counter stop :"+count);
                 break;
         }
     }
