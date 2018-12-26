@@ -108,6 +108,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                if(isCancelled()){
+                    //To make count goes on counting after pressing start button
+                    count=customCounter;
+                    break;
+                }
+
             }
             //Pass customCounter back to onPreExecute()
             return customCounter;
@@ -116,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            textView.setText("Counter is "+values[0]);
+            textView.setText(""+values[0]);
         }
 
         @Override
@@ -125,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             textView.setText("Counter is "+integer);
             //Make count to be the last integer in Async task
             //count = integer;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
         }
     }
 }
