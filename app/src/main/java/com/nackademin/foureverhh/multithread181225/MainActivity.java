@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int count = 0;
     private MyAsyncTask myAsyncTask;
     LooperThread looperThread;
+    CustomHandlerThread customHandlerThread;
     //Handler handler;
     //Thread newThread;
     @Override
@@ -36,9 +37,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_stop.setOnClickListener(this);
         looperThread = new LooperThread();
         looperThread.start();
+
+        customHandlerThread = new CustomHandlerThread("CustomHandlerThread");
+        customHandlerThread.start();
         //Make an instance of handler on the main looper
         //handler = new Handler(getApplicationContext().getMainLooper());
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(looperThread != null && looperThread.isAlive())
+            looperThread.handler.getLooper().quit();
+        if(customHandlerThread != null)
+            customHandlerThread.getLooper().quit();
     }
 
     @Override
@@ -47,15 +60,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.buttonThreadStarter:
                 Toast.makeText(getApplicationContext(),"Starter",Toast.LENGTH_SHORT).show();
                 mStopLoop=true;
-                //executeOnCustomLooper();
-                executeOnCustomLooperWithCustomHandler();
+                executeOnCustomLooper();
+                //executeOnCustomLooperWithCustomHandler();
 
-                textView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        textView.setText("Counter start:" + count);
-                    }
-                });
+
                 //Thread newThread = new Thread(new Runnable() {
             /*    newThread = new Thread(new Runnable() {
                     @Override
@@ -104,7 +112,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void executeOnCustomLooperWithCustomHandler(){
-        looperThread.handler.post(new Runnable() {
+        //looperThread.handler.post(new Runnable() {
+        customHandlerThread.mHandler.post(new Runnable() {
             @Override
             public void run() {
                 while(mStopLoop){
@@ -141,8 +150,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         count++;
                         Message message = new Message();
                         message.obj = ""+count;
-                        looperThread.handler.sendMessage(message);
-
+                        //looperThread.handler.sendMessage(message);
+                        customHandlerThread.mHandler.sendMessage(message);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textView.setText("Counter start:" + count);
+                            }
+                        });
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -150,7 +165,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }).start();
 
+
     }
+
+
     private class MyAsyncTask extends AsyncTask<Integer,Integer,Integer>{
 
         private int customCounter;
