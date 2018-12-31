@@ -2,6 +2,7 @@ package com.nackademin.foureverhh.multithread181225;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean mStopLoop;
     int count = 0;
     private MyAsyncTask myAsyncTask;
+    LooperThread looperThread;
     //Handler handler;
     //Thread newThread;
     @Override
@@ -25,12 +27,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.i(TAG,"Thread of Main thread: "+ Thread.currentThread().getId());
         btn_start = findViewById(R.id.buttonThreadStarter);
         btn_stop = findViewById(R.id.buttonStopThread);
         textView = findViewById(R.id.text_counter);
 
         btn_start.setOnClickListener(this);
         btn_stop.setOnClickListener(this);
+        looperThread = new LooperThread();
+        looperThread.start();
         //Make an instance of handler on the main looper
         //handler = new Handler(getApplicationContext().getMainLooper());
 
@@ -42,6 +47,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.buttonThreadStarter:
                 Toast.makeText(getApplicationContext(),"Starter",Toast.LENGTH_SHORT).show();
                 mStopLoop=true;
+                //executeOnCustomLooper();
+                executeOnCustomLooperWithCustomHandler();
+
+                textView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText("Counter start:" + count);
+                    }
+                });
                 //Thread newThread = new Thread(new Runnable() {
             /*    newThread = new Thread(new Runnable() {
                     @Override
@@ -73,12 +87,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
                 newThread.start();
                 */
+            /*
+            //To instantiate MyAsyncTask and make it execute
                 myAsyncTask = new MyAsyncTask();
                 myAsyncTask.execute(count);
+            */
                 break;
             case R.id.buttonStopThread:
-                //mStopLoop=false;
-                myAsyncTask.cancel(true);
+                mStopLoop=false;
+                //myAsyncTask.cancel(true);
                 //newThread.interrupt();
                 //count = 0;
                 //textView.setText("Counter stop :"+count);
@@ -86,6 +103,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void executeOnCustomLooperWithCustomHandler(){
+        looperThread.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                while(mStopLoop){
+                    try {
+                        Thread.sleep(1000);
+                        count++;
+                        Log.i(TAG,"Thread id if Runnable posted: " +
+                                Thread.currentThread().getId());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                               Log.i(TAG,"Thread id of runOnUIThread: "+
+                                       Thread.currentThread().getId()+", Count: "+count);
+                               textView.setText(""+count);
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public void executeOnCustomLooper(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(mStopLoop){
+                    try {
+                        Log.i(TAG,"Thread id of thread that sends message: "+
+                                Thread.currentThread().getId());
+                        Thread.sleep(1000);
+                        count++;
+                        Message message = new Message();
+                        message.obj = ""+count;
+                        looperThread.handler.sendMessage(message);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+    }
     private class MyAsyncTask extends AsyncTask<Integer,Integer,Integer>{
 
         private int customCounter;
